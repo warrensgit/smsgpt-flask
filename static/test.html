@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Short Code Test Form</title>
+    <script>
+        function handleSubmit() {
+            // Placeholder for future submit logic
+            console.log("Submit button clicked. Implement submit logic here.");
+        }
+    </script>
+</head>
+<body>
+    <h2>Short Code Test Form</h2>
+    <form id="shortcodeTestForm" onsubmit="event.preventDefault(); handleSubmit();">
+        <label for="sender">Sender Number:</label><br>
+        <input type="text" id="sender" name="sender" required><br><br>
+
+        <label for="message">Message:</label><br>
+        <textarea id="message" name="message" required></textarea><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
