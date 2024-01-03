@@ -1,14 +1,14 @@
 import os
 import requests
 from flask import Flask, request, jsonify
-import openai
+from openai import OpenAI
 import logging
 from xml.etree import ElementTree as ET
 
 app = Flask(__name__)
 
-# Setting up the OpenAI API key from environment variable
-openai.api_key = os.environ.get('OPENAI_API_KEY')
+# Set up the OpenAI client
+client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 
 # Configure logging
 #logging.basicConfig(filename='delivery_reports.log', level=logging.INFO,
@@ -31,23 +31,21 @@ def process_shortcode():
     if not all([sender_num, incoming_message]):
       return jsonify({"error": "Some parameters are missing!"}), 400
 
-    # OpenAI API call with the user's message from the 'incoming_message' parameter
-    response = openai.ChatCompletion.create(
+    # OpenAI API call with the user's message
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {
-                "role":
-                "system",
-                "content":
-                "You are a helpful assistant. Please keep your responses under 480 characters for SMS purposes."
+                "role": "system",
+                "content": "You are a helpful assistant. Please keep your responses under 480 characters for SMS purposes."
             },
             {
                 "role": "user",
-                "content":
-                incoming_message  # Using the content from the 'incoming_message' parameter
+                "content": incoming_message
             }
         ],
-        max_tokens=200)
+        max_tokens=200
+    )
 
     # Extracting the assistant's response
     message = response.choices[0].message['content']
