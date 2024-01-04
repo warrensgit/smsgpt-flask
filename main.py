@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify
 from openai import OpenAI
 import logging
 from xml.etree import ElementTree as ET
+import base64
 
 app = Flask(__name__)
 
@@ -33,7 +34,7 @@ def process_shortcode():
 
     # OpenAI API call with the user's message
     response = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",
         messages=[
             {
                 "role": "system",
@@ -47,12 +48,20 @@ def process_shortcode():
         max_tokens=200
     )
 
-    # Extracting the assistant's response
-    message = response.choices[0].message['content']
-    # Truncate the message to 480 characters if necessary
-    message = message[:480]
+    print(f"Full Response: {response}")
 
-    print(f"Generated message: {message}")
+    # Extracting the assistant's response
+    try:
+        # Accessing the first choice and then the message attribute of the ChatCompletionMessage object
+        assistant_message = response.choices[0].message.content
+    except Exception as e:
+        print(f"Error extracting message: {e}")
+        assistant_message = "Error in processing response."
+
+    # Truncate the message to 480 characters if necessary
+    assistant_message = assistant_message[:480]
+
+    print(f"Generated message: {assistant_message}")
 
     # Construct the authorization header for Basic Auth
     username = os.environ.get('OCEP_SMS_USERNAME')
@@ -66,26 +75,29 @@ def process_shortcode():
     sms_url = 'https://qa-sms.umsg.co.za/xml/send/?'
     payload = {
         'number': sender_num,  # Sending the response back to the sender
-        'message': message,
+        'message': assistant_message,
         'ems': '1',  # Enable EMS if the message is over 160 characters
-        'userref':
-        'unique_reference'  # Replace with an actual unique reference if needed
+        'userref': 'unique_reference'  # Replace with an actual unique reference if needed
     }
 
     # Make the GET request to the SMS gateway to send the SMS
     sms_response = requests.get(sms_url, params=payload, headers=headers)
 
-    # Check if the SMS was successfully enqueued
-    if sms_response.status_code == 200:
-      return jsonify({
-          "success": True,
-          "message": "Response sent via SMS"
-      }), 200
-    else:
-      return jsonify({
-          "success": False,
-          "error": "Failed to send SMS response"
-      }), sms_response.status_code
+    # Make the GET request to the SMS gateway to send the SMS
+    try:
+        sms_response = requests.get(sms_url, params=payload, headers=headers)
+        print(f"SMS Gateway Response: {sms_response.status_code}, {sms_response.text}")
+
+        # Check if the SMS was successfully enqueued
+        if sms_response.status_code == 200:
+            return jsonify({"success": True, "message": "Response sent via SMS"}), 200
+        else:
+            return jsonify({"success": False, "error": "Failed to send SMS response"}), sms_response.status_code
+
+    except Exception as e:
+        # Log the error
+        print(f"Error sending SMS: {e}")
+        return jsonify({"error": str(e)}), 500
 
   except Exception as e:
     # Log the error
@@ -112,10 +124,10 @@ def delivery_report():
       return jsonify({"error": "Missing parameters"}), 400
 
     # Log the delivery report data
-    logging.info(
-        f'Delivery report received - From: {from_number}, To: {to_number}, '
-        f'Success: {success_code}, SMSC Status: {smsc_status}, '
-        f'Reference: {reference_number}, Timestamp: {timestamp}')
+    #logging.info(
+      #  f'Delivery report received - From: {from_number}, To: {to_number}, '
+      #  f'Success: {success_code}, SMSC Status: {smsc_status}, '
+      #  f'Reference: {reference_number}, Timestamp: {timestamp}')
 
     # TODO: Update message status in a database or another storage system if necessary
 
@@ -142,7 +154,7 @@ def process_incoming_message():
 
   # Interact with OpenAI API with a character limit of 480
   response = openai.ChatCompletion.create(
-      model="gpt-4",
+      model="gpt-3.5-turbo",
       messages=[
           {
               "role":
