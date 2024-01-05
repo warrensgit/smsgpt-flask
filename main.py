@@ -16,7 +16,6 @@ client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 #logging.basicConfig(filename='delivery_reports.log', level=logging.INFO,
 # format='%(asctime)s:%(levelname)s:%(message)s')
 
-
 @app.route('/')
 def index():
   return app.send_static_file('test.html')
@@ -49,6 +48,10 @@ def process_shortcode():
             max_tokens=200
         )
 
+        
+        # Print the OpenAI API response
+        print(response)
+      
         # Extracting the assistant's response
         try:
             assistant_message = response.choices[0].message.content
@@ -58,7 +61,8 @@ def process_shortcode():
 
         # URL encode the message
         encoded_message = quote_plus(assistant_message[:480])
-
+        print("encoded message: " + encoded_message)
+        
         # Construct the authorization header for Basic Auth
         username = os.environ.get('OCEP_SMS_USERNAME')
         password = os.environ.get('OCEP_SMS_PASSWORD')
@@ -66,11 +70,12 @@ def process_shortcode():
         encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
         headers = {'Authorization': 'Basic ' + encoded_credentials}
 
+        
         # Construct the JSON payload for the POST request
         payload = {
             "to": sender_num,
             "message": encoded_message,
-            "ems": 1,  # Assuming EMS is enabled; adjust as necessary
+            "ems": 0,  # Assuming EMS is enabled; adjust as necessary
             "userref": "unique_reference"  # Replace with an actual unique reference if needed
         }
 
@@ -94,7 +99,6 @@ def process_shortcode():
     except Exception as e:
         print(f"Error in process_shortcode: {e}")
         return jsonify({"error": str(e)}), 500
-
 
 
 @app.route('/delivery_report', methods=['GET'])
@@ -174,11 +178,14 @@ def process_incoming_message():
         encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
         headers = {'Authorization': 'Basic ' + encoded_credentials}
 
+        # Log the Authorization header for inspection
+        print(f"Authorization Header: {headers['Authorization']}")
+        
         # Construct the JSON payload for the POST request
         payload = {
             "to": sender,
             "message": encoded_message,
-            "ems": 1,  # Assuming EMS is enabled; adjust as necessary
+            "ems": 0,  # Assuming EMS is enabled; adjust as necessary
             "userref": "unique_reference_w"  # Replace with an actual unique reference if needed
         }
 
