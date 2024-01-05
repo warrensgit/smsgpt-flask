@@ -5,6 +5,7 @@ from openai import OpenAI
 import logging
 from xml.etree import ElementTree as ET
 import base64
+from urllib.parse import quote_plus
 
 app = Flask(__name__)
 
@@ -23,86 +24,77 @@ def index():
 
 @app.route('/process_shortcode', methods=['GET'])
 def process_shortcode():
-  try:
-    # Extracting the parameters from the query string according to the Short Code API
-    sender_num = request.args.get('from')
-    incoming_message = request.args.get('incoming_message')
-
-    # Basic error handling for missing parameters
-    if not all([sender_num, incoming_message]):
-      return jsonify({"error": "Some parameters are missing!"}), 400
-
-    # OpenAI API call with the user's message
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a helpful assistant. Please keep your responses under 480 characters for SMS purposes."
-            },
-            {
-                "role": "user",
-                "content": incoming_message
-            }
-        ],
-        max_tokens=200
-    )
-
-    print(f"Full Response: {response}")
-
-    # Extracting the assistant's response
     try:
-        # Accessing the first choice and then the message attribute of the ChatCompletionMessage object
-        assistant_message = response.choices[0].message.content
-    except Exception as e:
-        print(f"Error extracting message: {e}")
-        assistant_message = "Error in processing response."
+        # Extracting the parameters from the query string
+        sender_num = request.args.get('from')
+        incoming_message = request.args.get('incoming_message')
 
-    # Truncate the message to 480 characters if necessary
-    assistant_message = assistant_message[:480]
+        # Basic error handling for missing parameters
+        if not all([sender_num, incoming_message]):
+            return jsonify({"error": "Some parameters are missing!"}), 400
 
-    print(f"Generated message: {assistant_message}")
+        # OpenAI API call with the user's message
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant. Please keep your responses under 480 characters for SMS purposes."
+                },
+                {
+                    "role": "user",
+                    "content": incoming_message
+                }
+            ],
+            max_tokens=200
+        )
 
-    # Construct the authorization header for Basic Auth
-    username = os.environ.get('OCEP_SMS_USERNAME')
-    password = os.environ.get('OCEP_SMS_PASSWORD')
-    credentials = f"{username}:{password}"
-    encoded_credentials = base64.b64encode(
-        credentials.encode('utf-8')).decode('utf-8')
-    headers = {'Authorization': f'Basic {encoded_credentials}'}
+        # Extracting the assistant's response
+        try:
+            assistant_message = response.choices[0].message.content
+        except Exception as e:
+            print(f"Error extracting message: {e}")
+            assistant_message = "Error in processing response."
 
-    # Construct the URL for sending the SMS
-    sms_url = 'https://qa-sms.umsg.co.za/xml/send/?'
-    payload = {
-        'number': sender_num,  # Sending the response back to the sender
-        'message': assistant_message,
-        'ems': '1',  # Enable EMS if the message is over 160 characters
-        'userref': 'unique_reference'  # Replace with an actual unique reference if needed
-    }
+        # URL encode the message
+        encoded_message = quote_plus(assistant_message[:480])
 
-    # Make the GET request to the SMS gateway to send the SMS
-    sms_response = requests.get(sms_url, params=payload, headers=headers)
+        # Construct the authorization header for Basic Auth
+        username = os.environ.get('OCEP_SMS_USERNAME')
+        password = os.environ.get('OCEP_SMS_PASSWORD')
+        credentials = f"{username}:{password}"
+        encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
+        headers = {'Authorization': 'Basic ' + encoded_credentials}
 
-    # Make the GET request to the SMS gateway to send the SMS
-    try:
-        sms_response = requests.get(sms_url, params=payload, headers=headers)
+        # Construct the JSON payload for the POST request
+        payload = {
+            "to": sender_num,
+            "message": encoded_message,
+            "ems": 1,  # Assuming EMS is enabled; adjust as necessary
+            "userref": "unique_reference"  # Replace with an actual unique reference if needed
+        }
+
+        # REST API endpoint for sending SMS
+        rest_api_url = "https://qa-sms.umsg.co.za/send/sms"
+
+        # Make the POST request to the SMS gateway to send the SMS
+        sms_response = requests.post(rest_api_url, json=payload, headers=headers)
         print(f"SMS Gateway Response: {sms_response.status_code}, {sms_response.text}")
 
         # Check if the SMS was successfully enqueued
         if sms_response.status_code == 200:
-            return jsonify({"success": True, "message": "Response sent via SMS"}), 200
+            response_data = sms_response.json()
+            if response_data.get("Action") == "enqueued":
+                return jsonify({"success": True, "message": "SMS enqueued for delivery"}), 200
+            else:
+                return jsonify({"success": False, "error": response_data.get("Error", "Unknown error")}), 200
         else:
-            return jsonify({"success": False, "error": "Failed to send SMS response"}), sms_response.status_code
+            return jsonify({"success": False, "error": "Failed to send SMS"}), sms_response.status_code
 
     except Exception as e:
-        # Log the error
-        print(f"Error sending SMS: {e}")
+        print(f"Error in process_shortcode: {e}")
         return jsonify({"error": str(e)}), 500
 
-  except Exception as e:
-    # Log the error
-    print(f"Error: {e}")
-    return jsonify({"error": str(e)}), 500
 
 
 @app.route('/delivery_report', methods=['GET'])
@@ -143,82 +135,74 @@ def delivery_report():
 
 @app.route('/process_incoming_message', methods=['POST'])
 def process_incoming_message():
+    try:
+        # Parse the incoming XML to extract message content and sender number
+        root = ET.fromstring(request.data)
+        content = root.find('content').text
+        sender = root.find('sender').text
 
-  # This endpoint will handle incoming messages sent to your service's number
-  message_xml = request.data  # Assume the incoming message comes in XML
+        # OpenAI API call with the user's message
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant. Please keep your responses under 480 characters for SMS purposes."
+                },
+                {
+                    "role": "user",
+                    "content": content
+                }
+            ],
+            max_tokens=200
+        )
 
-  # Parse the XML to extract the message content and sender number
-  root = ET.fromstring(message_xml)
-  content = root.find('content').text
-  sender = root.find('sender').text
+        # Extracting the assistant's response
+        try:
+            assistant_message = response.choices[0].message.content
+        except Exception as e:
+            print(f"Error extracting message: {e}")
+            assistant_message = "Error in processing response."
 
-  # Interact with OpenAI API with a character limit of 480
-  response = openai.ChatCompletion.create(
-      model="gpt-3.5-turbo",
-      messages=[
-          {
-              "role":
-              "system",
-              "content":
-              "You are a helpful assistant. Please keep your responses under 480 characters for SMS purposes."
-          },
-          {
-              "role": "user",
-              "content": content  # Using the content from the parsed XML
-          },
-          {
-              "role": "assistant",
-              "content": ""  # This will be filled by the OpenAI API response
-          }
-      ],
-      max_tokens=200)
+        # Truncate and URL encode the message
+        encoded_message = quote_plus(assistant_message[:480])
 
-  # Format the response for SMS
-  response_message = response.choices[0].message['content']
+        # Construct the authorization header for Basic Auth
+        username = os.environ.get('OCEP_SMS_USERNAME')
+        password = os.environ.get('OCEP_SMS_PASSWORD')
+        credentials = f"{username}:{password}"
+        encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
+        headers = {'Authorization': 'Basic ' + encoded_credentials}
 
-  # Truncate the response to 480 characters if necessary
-  response_message = response_message[:480]
+        # Construct the JSON payload for the POST request
+        payload = {
+            "to": sender,
+            "message": encoded_message,
+            "ems": 1,  # Assuming EMS is enabled; adjust as necessary
+            "userref": "unique_reference_w"  # Replace with an actual unique reference if needed
+        }
 
-  # Construct the authorization header for Basic Auth
-  username = os.environ.get('OCEP_SMS_USERNAME')
-  password = os.environ.get('OCEP_SMS_PASSWORD')
-  credentials = f"{username}:{password}"
-  encoded_credentials = base64.b64encode(
-      credentials.encode('utf-8')).decode('utf-8')
-  headers = {'Authorization': f'Basic {encoded_credentials}'}
+        # REST API endpoint for sending SMS
+        rest_api_url = "https://qa-sms.umsg.co.za/send/sms"
 
-  # Construct the URL for sending the SMS
-  sms_url = 'https://qa-sms.umsg.co.za/xml/send/?'
-  payload = {
-      'number':
-      sender,  # Assuming you want to send the response back to the sender
-      'message': response_message,
-      'ems': 1,
-      'userref':
-      'unique_reference_w'  # Replace with an actual unique reference if needed
-  }
+        # Make the POST request to the SMS gateway to send the SMS
+        sms_response = requests.post(rest_api_url, json=payload, headers=headers)
+        print(f"SMS Gateway Response: {sms_response.status_code}, {sms_response.text}")
 
-  # Make the GET request to the SMS gateway to send the SMS
-  response = requests.get(sms_url, params=payload, headers=headers)
+        # Check if the SMS was successfully enqueued
+        if sms_response.status_code == 200:
+            response_data = sms_response.json()
+            if response_data.get("Action") == "enqueued":
+                return jsonify({"success": True, "message": "SMS enqueued for delivery"}), 200
+            else:
+                return jsonify({"success": False, "error": response_data.get("Error", "Unknown error")}), 200
+        else:
+            return jsonify({"success": False, "error": "Failed to send SMS"}), sms_response.status_code
 
-  # Check if the SMS was successfully enqueued
-  if response.status_code == 200:
-    # Parse the XML response from the SMS gateway
-    root = ET.fromstring(response.text)
-    action = root.find('action').text
-    if action == 'enqueued':
-      return jsonify({
-          "success": True,
-          "message": "SMS enqueued for delivery"
-      }), 200
-    else:
-      error = root.find('error').text
-      return jsonify({"success": False, "error": error}), 200
-  else:
-    return jsonify({
-        "success": False,
-        "error": "Failed to send SMS"
-    }), response.status_code
+    except Exception as e:
+        print(f"Error in process_incoming_message: {e}")
+        return jsonify({"error": str(e)}), 500
+
 
 
 app.run(host='0.0.0.0', port=81)
