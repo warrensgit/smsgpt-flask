@@ -68,8 +68,16 @@ def process_shortcode():
         password = os.environ.get('OCEP_SMS_PASSWORD')
         credentials = f"{username}:{password}"
         encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
-        headers = {'Authorization': 'Basic ' + encoded_credentials}
-
+        
+        # Construct the headers for the request
+        headers = {
+            'Authorization': 'Basic ' + encoded_credentials,
+            'Content-Type': 'application/json',
+            'User-Agent': 'PostmanRuntime/7.36.0',
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive'
+        }
         
         # Construct the JSON payload for the POST request
         payload = {
@@ -176,7 +184,16 @@ def process_incoming_message():
         password = os.environ.get('OCEP_SMS_PASSWORD')
         credentials = f"{username}:{password}"
         encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
-        headers = {'Authorization': 'Basic ' + encoded_credentials}
+        
+        # Construct the headers for the request
+        headers = {
+            'Authorization': 'Basic ' + encoded_credentials,
+            'Content-Type': 'application/json',
+            'User-Agent': 'PostmanRuntime/7.36.0',
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive'
+        }
 
         # Log the Authorization header for inspection
         print(f"Authorization Header: {headers['Authorization']}")
@@ -184,7 +201,7 @@ def process_incoming_message():
         # Construct the JSON payload for the POST request
         payload = {
             "to": sender,
-            "message": encoded_message,
+            "message": assistant_message[:480],  # Truncate the message to 480 c's,
             "ems": 0,  # Assuming EMS is enabled; adjust as necessary
             "userref": "unique_reference_w"  # Replace with an actual unique reference if needed
         }
