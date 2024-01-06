@@ -61,7 +61,7 @@ def process_shortcode():
 
         # URL encode the message
         encoded_message = quote_plus(assistant_message[:480])
-        print("encoded message: " + encoded_message)
+        print("encoded message: " + assistant_message)
         
         # Construct the authorization header for Basic Auth
         username = os.environ.get('OCEP_SMS_USERNAME')
@@ -82,7 +82,7 @@ def process_shortcode():
         # Construct the JSON payload for the POST request
         payload = {
             "to": sender_num,
-            "message": encoded_message,
+            "message": assistant_message[:480],
             "ems": 0,  # Assuming EMS is enabled; adjust as necessary
             "userref": "unique_reference"  # Replace with an actual unique reference if needed
         }
