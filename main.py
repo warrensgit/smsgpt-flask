@@ -148,10 +148,10 @@ def delivery_report():
 @app.route('/process_incoming_message', methods=['POST'])
 def process_incoming_message():
     try:
-        # Parse the incoming XML to extract message content and sender number
-        root = ET.fromstring(request.data)
-        content = root.find('content').text
-        sender = root.find('sender').text
+        # Parse the incoming JSON data
+        data = request.json
+        content = data.get('content')
+        sender = data.get('sender')
 
         # OpenAI API call with the user's message
         response = client.chat.completions.create(
