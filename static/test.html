@@ -3,27 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Short Code Test Form</title>
+    <title>SMS Short Code Test Form</title>
+    <style>
+        #responseBox {
+            border: 1px solid #ccc;
+            background-color: #f5f5f5;
+            padding: 10px;
+            margin-top: 10px;
+            display: none; /* Initially hidden */
+            color: blue;
+        }
+    </style>
     <script>
         function handleSubmit() {
               
               // Prevent the default form submit action
               event.preventDefault();
+              
               // Get the form data
               const sender = document.getElementById("sender").value;
               const message = document.getElementById("message").value;
+              
               // Construct the query parameters
               const queryParams = new URLSearchParams({
                   from: sender,
                   incoming_message: message
               });
+              
               // Send a GET request to the Flask server's /process_shortcode endpoint
               fetch(`/process_shortcode?${queryParams.toString()}`)
                   .then(response => response.json())
                   .then(data => {
                       // Handle the response data from the server
                       console.log("Response from the server:", data);
-                      // You can add code here to update the UI with the response if needed
+                      
+                      // Display the response data
+                      const responseBox = document.getElementById("responseBox");
+                      responseBox.style.display = "block"; // Show the response box
+                      responseBox.textContent = "Sender: " + sender + "\nMessage: " + message + "\nResponse: " + JSON.stringify(data);
+
+                      // Clear the form fields
+                      document.getElementById("sender").value = '';
+                      document.getElementById("message").value = '';
                   })
                   .catch(error => {
                       // Handle any errors that occur during the fetch
@@ -68,7 +89,7 @@
 </head>
 <body>
     
-    <h2>Short Code Test Form</h2>
+    <h2>SMS Short Code Test Form</h2>
     
     <form id="shortcodeTestForm" onsubmit="handleSubmit();">
         <label for="sender">Sender Number (your number in format 27xxx):</label><br>
@@ -80,7 +101,8 @@
         <button type="submit">Submit Message</button>
     </form>
     
-
+    <!-- Response Box -->
+    <div id="responseBox"></div>
     <!--
     <h2>Process Incoming Message Test Form</h2>
     <form id="incomingMessageTestForm" onsubmit="submitIncoming();">

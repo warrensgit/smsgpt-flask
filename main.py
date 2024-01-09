@@ -5,7 +5,7 @@ from openai import OpenAI
 import logging
 from xml.etree import ElementTree as ET
 import base64
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus 
 
 app = Flask(__name__)
 
