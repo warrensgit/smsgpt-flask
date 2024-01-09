@@ -145,13 +145,14 @@ def delivery_report():
     return jsonify({"error": "Error processing delivery report"}), 500
 
 
-@app.route('/process_incoming_message', methods=['POST'])
+@app.route('/process_incoming_message', methods=['GET'])
 def process_incoming_message():
     try:
-        # Parse the incoming JSON data
-        data = request.json
-        content = data.get('content')
-        sender = data.get('sender')
+        # Extracting parameters from the query string
+        from_number = request.args.get('FN')
+        to_number = request.args.get('TN')
+        message_text = request.args.get('MS')
+        timestamp = request.args.get('TS')
 
         # OpenAI API call with the user's message
         response = client.chat.completions.create(
@@ -163,7 +164,7 @@ def process_incoming_message():
                 },
                 {
                     "role": "user",
-                    "content": content
+                    "content": message_text
                 }
             ],
             max_tokens=200
@@ -200,9 +201,9 @@ def process_incoming_message():
         
         # Construct the JSON payload for the POST request
         payload = {
-            "to": sender,
+            "to": from_number,
             "message": assistant_message[:480],  # Truncate the message to 480 c's,
-            "ems": 0,  # Assuming EMS is enabled; adjust as necessary
+            "ems": 1,  # Assuming EMS is enabled; adjust as necessary
             "userref": "unique_reference_w"  # Replace with an actual unique reference if needed
         }
 

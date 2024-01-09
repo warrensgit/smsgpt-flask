@@ -6,9 +6,34 @@
     <title>Short Code Test Form</title>
     <script>
         function handleSubmit() {
-            // Code for submitting shortcode...
+              
+              // Prevent the default form submit action
+              event.preventDefault();
+              // Get the form data
+              const sender = document.getElementById("sender").value;
+              const message = document.getElementById("message").value;
+              // Construct the query parameters
+              const queryParams = new URLSearchParams({
+                  from: sender,
+                  incoming_message: message
+              });
+              // Send a GET request to the Flask server's /process_shortcode endpoint
+              fetch(`/process_shortcode?${queryParams.toString()}`)
+                  .then(response => response.json())
+                  .then(data => {
+                      // Handle the response data from the server
+                      console.log("Response from the server:", data);
+                      // You can add code here to update the UI with the response if needed
+                  })
+                  .catch(error => {
+                      // Handle any errors that occur during the fetch
+                      console.error("Error fetching response:", error);
+                  });
+
+          
         }
 
+        /*  
         function submitIncoming() {
             event.preventDefault();
 
@@ -38,12 +63,12 @@
                 console.error("Error fetching response:", error);
             });
         }
+        */
     </script>
 </head>
 <body>
-    <!--
+    
     <h2>Short Code Test Form</h2>
-     Existing Short Code Form 
     
     <form id="shortcodeTestForm" onsubmit="handleSubmit();">
         <label for="sender">Sender Number:</label><br>
@@ -54,8 +79,9 @@
 
         <button type="submit">Submit</button>
     </form>
-    -->
+    
 
+    <!--
     <h2>Process Incoming Message Test Form</h2>
     <form id="incomingMessageTestForm" onsubmit="submitIncoming();">
         <label for="incomingSender">Sender Number (your number in format 27xxx):</label><br>
@@ -66,5 +92,7 @@
 
         <button type="submit">Submit Message</button>
     </form>
+    -->
+</body>
 </body>
 </html>
