@@ -12,9 +12,8 @@ app = Flask(__name__)
 # Set up the OpenAI client
 client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 
-# Configure logging
-#logging.basicConfig(filename='delivery_reports.log', level=logging.INFO,
-# format='%(asctime)s:%(levelname)s:%(message)s')
+# Configure logging to log to a file
+logging.basicConfig(filename='incoming_messages.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
 @app.route('/')
 def index():
@@ -121,17 +120,17 @@ def delivery_report():
     timestamp = request.args.get('TS')
 
     # Basic error handling for missing parameters
-    if not all([
-        from_number, to_number, success_code, smsc_status, reference_number,
-        timestamp
-    ]):
-      return jsonify({"error": "Missing parameters"}), 400
+    #if not all([
+    #    from_number, to_number, success_code, smsc_status, reference_number,
+    #    timestamp
+    #]):
+    #  return jsonify({"error": "Missing parameters"}), 400
 
-    # Log the delivery report data
-    #logging.info(
-      #  f'Delivery report received - From: {from_number}, To: {to_number}, '
-      #  f'Success: {success_code}, SMSC Status: {smsc_status}, '
-      #  f'Reference: {reference_number}, Timestamp: {timestamp}')
+    #Log the delivery report data
+    logging.info(
+        f'Delivery report received - From: {from_number}, To: {to_number}, '
+        f'Success: {success_code}, SMSC Status: {smsc_status}, '
+        f'Reference: {reference_number}, Timestamp: {timestamp}')
 
     # TODO: Update message status in a database or another storage system if necessary
 
@@ -154,6 +153,9 @@ def process_incoming_message():
         message_text = request.args.get('MS')
         timestamp = request.args.get('TS')
 
+        # Log the incoming message details
+        logging.info(f'Incoming message received - From: {from_number}, To: {to_number}, Message: {message_text}, Timestamp: {timestamp}')
+      
         # OpenAI API call with the user's message
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
