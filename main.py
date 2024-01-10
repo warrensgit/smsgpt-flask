@@ -148,7 +148,7 @@ def process_incoming_message():
         account_username = request.args.get('AccUsername')  # Optional
 
         # Log the incoming message details
-        logging.info(f'Incoming message received - From: {from_number}, To: {to_number}, Message: {message_text}, DateTime: {DateTime}')
+        logging.info(f'Incoming message received - From: {from_number}, To: {to_number}, Message: {message_text}, DateTime: {date_received}')
       
         # OpenAI API call with the user's message
         response = client.chat.completions.create(
@@ -174,7 +174,7 @@ def process_incoming_message():
             assistant_message = "Error in processing response."
 
         # Truncate and URL encode the message
-        encoded_message = quote_plus(assistant_message[:480])
+        #encoded_message = quote_plus(assistant_message[:480])
 
         # Construct the authorization header for Basic Auth
         username = os.environ.get('OCEP_SMS_USERNAME')
