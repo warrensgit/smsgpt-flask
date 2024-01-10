@@ -61,3 +61,11 @@
 2024-01-09 16:06:58,732:INFO:172.31.196.26 - - [09/Jan/2024 16:06:58] "GET / HTTP/1.1" 200 -
 2024-01-09 16:07:13,585:INFO:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
 2024-01-09 16:07:14,563:INFO:172.31.196.26 - - [09/Jan/2024 16:07:14] "GET /process_shortcode?from=27827778652&incoming_message=what+is+nuclear+fusion? HTTP/1.1" 200 -
+2024-01-10 15:20:19,343:INFO:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:81
+ * Running on http://172.31.196.32:81
+2024-01-10 15:20:19,344:INFO:[33mPress CTRL+C to quit[0m
+2024-01-10 15:20:20,470:INFO:172.31.196.32 - - [10/Jan/2024 15:20:20] "GET / HTTP/1.1" 200 -
+2024-01-10 15:20:38,675:INFO:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-01-10 15:20:39,627:INFO:172.31.196.32 - - [10/Jan/2024 15:20:39] "GET /process_shortcode?from=27827778652&incoming_message=Whho+are+you?+ HTTP/1.1" 200 -

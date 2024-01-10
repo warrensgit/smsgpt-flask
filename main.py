@@ -47,10 +47,6 @@ def process_shortcode():
             max_tokens=200
         )
 
-        
-        # Print the OpenAI API response
-        print(response)
-      
         # Extracting the assistant's response
         try:
             assistant_message = response.choices[0].message.content
@@ -58,16 +54,12 @@ def process_shortcode():
             print(f"Error extracting message: {e}")
             assistant_message = "Error in processing response."
 
-        # URL encode the message
-        encoded_message = quote_plus(assistant_message[:480])
-        print("encoded message: " + assistant_message)
-        
         # Construct the authorization header for Basic Auth
         username = os.environ.get('OCEP_SMS_USERNAME')
         password = os.environ.get('OCEP_SMS_PASSWORD')
         credentials = f"{username}:{password}"
         encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
-        
+
         # Construct the headers for the request
         headers = {
             'Authorization': 'Basic ' + encoded_credentials,
@@ -77,13 +69,13 @@ def process_shortcode():
             'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive'
         }
-        
+
         # Construct the JSON payload for the POST request
         payload = {
             "to": sender_num,
             "message": assistant_message[:480],
-            "ems": 0,  # Assuming EMS is enabled; adjust as necessary
-            "userref": "unique_reference"  # Replace with an actual unique reference if needed
+            "ems": 0,
+            "userref": "unique_reference"
         }
 
         # REST API endpoint for sending SMS
@@ -91,21 +83,21 @@ def process_shortcode():
 
         # Make the POST request to the SMS gateway to send the SMS
         sms_response = requests.post(rest_api_url, json=payload, headers=headers)
-        print(f"SMS Gateway Response: {sms_response.status_code}, {sms_response.text}")
 
-        # Check if the SMS was successfully enqueued
-        if sms_response.status_code == 200:
-            response_data = sms_response.json()
-            if response_data.get("Action") == "enqueued":
-                return jsonify({"success": True, "message": "SMS enqueued for delivery"}), 200
-            else:
-                return jsonify({"success": False, "error": response_data.get("Error", "Unknown error")}), 200
+        # Prepare a response object
+        response_data = {
+            "openai_response": assistant_message,  # This is the assistant's response
+            "sms_gateway_response": sms_response.json() if sms_response.status_code == 200 else "Failed to send SMS"
+        }
+
+        # Determine the overall success
+        if sms_response.status_code == 200 and response_data["sms_gateway_response"].get("Action") == "enqueued":
+            return jsonify({"success": True, "message": "SMS enqueued for delivery", "data": response_data}), 200
         else:
-            return jsonify({"success": False, "error": "Failed to send SMS"}), sms_response.status_code
+            return jsonify({"success": False, "error": "Failed to send SMS", "data": response_data}), 200
 
     except Exception as e:
-        print(f"Error in process_shortcode: {e}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"success": False, "error": str(e), "data": {}}), 500
 
 
 @app.route('/delivery_report', methods=['GET'])
