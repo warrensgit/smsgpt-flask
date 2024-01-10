@@ -69,3 +69,21 @@
 2024-01-10 15:20:20,470:INFO:172.31.196.32 - - [10/Jan/2024 15:20:20] "GET / HTTP/1.1" 200 -
 2024-01-10 15:20:38,675:INFO:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
 2024-01-10 15:20:39,627:INFO:172.31.196.32 - - [10/Jan/2024 15:20:39] "GET /process_shortcode?from=27827778652&incoming_message=Whho+are+you?+ HTTP/1.1" 200 -
+2024-01-10 15:27:36,182:INFO:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-01-10 15:27:37,116:INFO:172.31.196.32 - - [10/Jan/2024 15:27:37] "GET /process_shortcode?from=27827778652&incoming_message=what+is+nuclear+fusion?+ HTTP/1.1" 200 -
+2024-01-10 15:28:04,788:INFO:172.31.196.32 - - [10/Jan/2024 15:28:04] "GET / HTTP/1.1" 200 -
+2024-01-10 15:45:13,418:INFO:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:81
+ * Running on http://172.31.196.18:81
+2024-01-10 15:45:13,419:INFO:[33mPress CTRL+C to quit[0m
+2024-01-10 15:45:14,427:INFO:172.31.196.18 - - [10/Jan/2024 15:45:14] "GET / HTTP/1.1" 200 -
+2024-01-10 15:45:29,214:INFO:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-01-10 15:45:30,280:INFO:172.31.196.18 - - [10/Jan/2024 15:45:30] "GET /process_shortcode?from=27827778652&incoming_message=who+are+you?+ HTTP/1.1" 200 -
+2024-01-10 17:30:55,143:INFO:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:81
+ * Running on http://172.31.196.16:81
+2024-01-10 17:30:55,143:INFO:[33mPress CTRL+C to quit[0m
+2024-01-10 17:30:55,402:INFO:172.31.196.16 - - [10/Jan/2024 17:30:55] "GET / HTTP/1.1" 200 -
+2024-01-10 17:30:56,503:INFO:172.31.196.16 - - [10/Jan/2024 17:30:56] "GET / HTTP/1.1" 200 -

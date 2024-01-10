@@ -91,7 +91,7 @@ def process_shortcode():
         }
 
         # Determine the overall success
-        if sms_response.status_code == 200 and response_data["sms_gateway_response"].get("Action") == "enqueued":
+        if sms_response.status_code == 200 and response_data["sms_gateway_response"].get("action") == "enqueued":
             return jsonify({"success": True, "message": "SMS enqueued for delivery", "data": response_data}), 200
         else:
             return jsonify({"success": False, "error": "Failed to send SMS", "data": response_data}), 200
@@ -139,14 +139,16 @@ def delivery_report():
 @app.route('/process_incoming_message', methods=['GET'])
 def process_incoming_message():
     try:
-        # Extracting parameters from the query string
-        from_number = request.args.get('FN')
-        to_number = request.args.get('TN')
-        message_text = request.args.get('MS')
-        timestamp = request.args.get('TS')
+      # Extracting parameters from the query string based on the provider's specification
+        from_number = request.args.get('fn')
+        to_number = request.args.get('tn')
+        message_text = request.args.get('ms')
+        campaign_name = request.args.get('CampaignName')  # Optional
+        date_received = request.args.get('DateTime')  # Optional
+        account_username = request.args.get('AccUsername')  # Optional
 
         # Log the incoming message details
-        logging.info(f'Incoming message received - From: {from_number}, To: {to_number}, Message: {message_text}, Timestamp: {timestamp}')
+        logging.info(f'Incoming message received - From: {from_number}, To: {to_number}, Message: {message_text}, DateTime: {DateTime}')
       
         # OpenAI API call with the user's message
         response = client.chat.completions.create(
