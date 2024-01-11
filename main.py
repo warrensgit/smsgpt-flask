@@ -37,7 +37,7 @@ def process_shortcode():
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a helpful assistant. Please keep your responses under 480 characters for SMS purposes."
+                    "content": "You are a helpful assistant. Please keep your responses under 480 characters for SMS purposes. End your response with a follow up question as a helpful assistant."
                 },
                 {
                     "role": "user",
@@ -74,8 +74,8 @@ def process_shortcode():
         payload = {
             "to": sender_num,
             "message": assistant_message[:480],
-            "ems": 0,
-            "userref": "unique_reference"
+            "ems": 1,  # Assuming EMS is enabled; adjust as necessary
+            "userref": "unique_reference_ws"
         }
 
         # REST API endpoint for sending SMS
@@ -156,7 +156,7 @@ def process_incoming_message():
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a helpful assistant. Please keep your responses under 480 characters for SMS purposes."
+                    "content": "You are a helpful assistant. Please keep your responses under 480 characters for SMS purposes. End your response with a follow up question as a helpful assistant."
                 },
                 {
                     "role": "user",
