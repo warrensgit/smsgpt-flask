@@ -10,10 +10,22 @@
             background-color: #f5f5f5;
             padding: 10px;
             margin-top: 10px;
-            display: none; /* Initially hidden */
             color: blue;
+            white-space: pre-wrap; /* Ensures that line breaks are honored */
         }
+
+        /* Media query for devices with width less than or equal to 600px */
+        @media (max-width: 600px) {
+            #responseBox {
+                padding: 5px;
+                font-size: 14px; /* Smaller font-size for mobile devices */
+            }
+            /* Additional mobile friendly styles */
+        }
+
+        /* Any other mobile friendly adjustments can go here */
     </style>
+
     <script>
         function handleSubmit() {
               
@@ -40,7 +52,9 @@
                       // Display the response data
                       const responseBox = document.getElementById("responseBox");
                       responseBox.style.display = "block"; // Show the response box
-                      responseBox.textContent = "Sender: " + sender + "\nMessage: " + message + "\nResponse: " + JSON.stringify(data);
+                      // Inside the handleSubmit function, find the following line:
+                      responseBox.textContent = "Check your phone!" + "\nSender: " + sender + "\nMessage: " + message + "\nResponse: " + JSON.stringify(data);
+
 
                       // Clear the form fields
                       document.getElementById("sender").value = '';
