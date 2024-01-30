@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMS Short Code Test Form</title>
+    <title>SMS Test Form</title>
     <style>
         #responseBox {
             border: 1px solid #ccc;
@@ -11,126 +11,78 @@
             padding: 10px;
             margin-top: 10px;
             color: blue;
-            white-space: pre-wrap; /* Ensures that line breaks are honored */
+            white-space: pre-wrap;
         }
 
-        /* Media query for devices with width less than or equal to 600px */
         @media (max-width: 600px) {
             #responseBox {
                 padding: 5px;
-                font-size: 14px; /* Smaller font-size for mobile devices */
+                font-size: 14px;
             }
-            /* Additional mobile friendly styles */
         }
-
-        /* Any other mobile friendly adjustments can go here */
     </style>
 
     <script>
         function handleSubmit() {
-              
-              // Prevent the default form submit action
-              event.preventDefault();
-              
-              // Get the form data
-              const sender = document.getElementById("sender").value;
-              const message = document.getElementById("message").value;
-              
-              // Construct the query parameters
-              const queryParams = new URLSearchParams({
-                  from: sender,
-                  incoming_message: message
-              });
-              
-              // Send a GET request to the Flask server's /process_shortcode endpoint
-              fetch(`/process_shortcode?${queryParams.toString()}`)
-                  .then(response => response.json())
-                  .then(data => {
-                      // Handle the response data from the server
-                      console.log("Response from the server:", data);
-                      
-                      // Display the response data
-                      const responseBox = document.getElementById("responseBox");
-                      responseBox.style.display = "block"; // Show the response box
-                      // Inside the handleSubmit function, find the following line:
-                      responseBox.textContent = "Check your phone!" + "\nSender: " + sender + "\nMessage: " + message + "\nResponse: " + JSON.stringify(data);
-
-
-                      // Clear the form fields
-                      document.getElementById("sender").value = '';
-                      document.getElementById("message").value = '';
-                  })
-                  .catch(error => {
-                      // Handle any errors that occur during the fetch
-                      console.error("Error fetching response:", error);
-                  });
-
-          
+            event.preventDefault();
+            const sender = document.getElementById("sender").value;
+            const message = document.getElementById("message").value;
+            const queryParams = new URLSearchParams({from: sender, incoming_message: message});
+            fetch(`/process_shortcode?${queryParams.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response from the server:", data);
+                    const responseBox = document.getElementById("responseBox");
+                    responseBox.style.display = "block";
+                    responseBox.textContent = "Check your phone!" + "\nSender: " + sender + "\nMessage: " + message + "\nResponse: " + JSON.stringify(data);
+                    document.getElementById("sender").value = '';
+                    document.getElementById("message").value = '';
+                })
+                .catch(error => {
+                    console.error("Error fetching response:", error);
+                });
         }
 
-        /*  
         function submitIncoming() {
             event.preventDefault();
-
-            // Get the form data
-            const sender = document.getElementById("incomingSender").value;
-            const content = document.getElementById("incomingContent").value;
-
-            // Construct the JSON payload
-            const payload = {
-                sender: sender,
-                content: content
-            };
-
-            // Send a POST request to the Flask server's /process_incoming_message endpoint
-            fetch(`/process_incoming_message`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Response from the server:", data);
-            })
-            .catch(error => {
-                console.error("Error fetching response:", error);
-            });
+            const from_number = document.getElementById("incomingSender").value;
+            const to_number = 'ReplaceWithToNumber'; // Replace with actual to_number or use another input field
+            const message_text = document.getElementById("incomingContent").value;
+            const queryParams = new URLSearchParams({fn: from_number, tn: to_number, ms: message_text});
+            fetch(`/process_incoming_message?${queryParams.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response from the server:", data);
+                })
+                .catch(error => {
+                    console.error("Error fetching response:", error);
+                });
         }
-        */
     </script>
 </head>
 <body>
-    
+    <!-- SMS Short Code Test Form (Commented Out) -->
+    <!--
     <h2>SMS Short Code: Last Row Solutions.</h2>
-    
     <form id="shortcodeTestForm" onsubmit="handleSubmit();">
         <label for="sender">Sender Number (your number in format 27xxx):</label><br>
         <input type="text" id="sender" name="sender" required><br><br>
-
-        <label for="message">Message Content: (message to smsgpt server)</label><br>
+        <label for="message">Message Content:</label><br>
         <textarea id="message" name="message" required></textarea><br><br>
-
         <button type="submit">Submit Message</button>
     </form>
+    -->
 
-   
-    
-    <!-- Response Box -->
-    <div id="responseBox"></div>
-    <!--
+    <!-- Process Incoming Message Test Form -->
     <h2>Process Incoming Message Test Form</h2>
     <form id="incomingMessageTestForm" onsubmit="submitIncoming();">
         <label for="incomingSender">Sender Number (your number in format 27xxx):</label><br>
         <input type="text" id="incomingSender" name="incomingSender" required><br><br>
-
-        <label for="incomingContent">Message Content: (message to smsgpt)</label><br>
+        <label for="incomingContent">Message Content:</label><br>
         <textarea id="incomingContent" name="incomingContent" required></textarea><br><br>
-
         <button type="submit">Submit Message</button>
     </form>
-    -->
-</body>
+
+    <div id="responseBox"></div>
 </body>
 </html>
