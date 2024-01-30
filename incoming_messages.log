@@ -139,3 +139,25 @@
  * Running on http://172.31.196.14:81
 2024-01-29 17:58:19,616:INFO:[33mPress CTRL+C to quit[0m
 2024-01-29 17:58:20,624:INFO:172.31.196.14 - - [29/Jan/2024 17:58:20] "GET / HTTP/1.1" 200 -
+2024-01-29 18:23:51,799:INFO:172.31.196.14 - - [29/Jan/2024 18:23:51] "GET / HTTP/1.1" 200 -
+2024-01-30 09:48:57,451:INFO:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:81
+ * Running on http://172.31.196.9:81
+2024-01-30 09:48:57,452:INFO:[33mPress CTRL+C to quit[0m
+2024-01-30 09:48:58,891:INFO:172.31.196.9 - - [30/Jan/2024 09:48:58] "GET / HTTP/1.1" 200 -
+2024-01-30 09:50:01,083:INFO:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:81
+ * Running on http://172.31.196.9:81
+2024-01-30 09:50:01,084:INFO:[33mPress CTRL+C to quit[0m
+2024-01-30 09:50:02,788:INFO:172.31.196.9 - - [30/Jan/2024 09:50:02] "GET / HTTP/1.1" 200 -
+2024-01-30 09:50:55,914:INFO:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:81
+ * Running on http://172.31.196.9:81
+2024-01-30 09:50:55,915:INFO:[33mPress CTRL+C to quit[0m
+2024-01-30 09:50:58,067:INFO:172.31.196.9 - - [30/Jan/2024 09:50:58] "GET / HTTP/1.1" 200 -
+2024-01-30 12:45:09,667:INFO:172.31.196.9 - - [30/Jan/2024 12:45:09] "GET / HTTP/1.1" 200 -
+2024-01-30 12:45:22,745:INFO:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-01-30 12:45:23,714:INFO:172.31.196.9 - - [30/Jan/2024 12:45:23] "GET /process_shortcode?from=27827778652&incoming_message=Who+are+you?+ HTTP/1.1" 200 -
